@@ -1,8 +1,9 @@
-# moOde Peppy skins — 1920×1280 (for moOdeX86)
+# moOde Peppy skins — 1920×1280
 
-Peppy **Meter** and **Spectrum** skins scaled to **1920×1280** for
-[moOdeX86](https://github.com/Gjuju/moodeX86) local displays, plus the small
-generators that produce them.
+Peppy **Meter** and **Spectrum** skins scaled to **1920×1280** for any
+[moOde audio player](https://github.com/moode-player/moode) install with a
+1920×1280 local display (Raspberry Pi or x86), plus the small generators that
+produce them.
 
 The skins are **4× LANCZOS upscales** of moOde's stock **480×320** Peppy skins:
 every image is resized ×4 and every pixel coordinate in `meters.txt` /
@@ -20,7 +21,7 @@ every image is resized ×4 and every pixel coordinate in `meters.txt` /
 
 Each tarball contains a top-level `1920x1280/` folder.
 
-## Install (on a moOdeX86 box)
+## Install
 
 ```bash
 sudo tar xzf peppymeter-1920x1280.tar.gz    -C /opt/peppymeter/
