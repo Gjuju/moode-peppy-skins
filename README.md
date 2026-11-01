@@ -24,6 +24,13 @@ Each tarball contains a top-level `1920x1280/` folder.
 ## Install
 
 ```bash
+git clone https://github.com/Gjuju/moode-peppy-skins.git
+./moode-peppy-skins/install.sh
+```
+
+Manual install:
+
+```bash
 sudo tar xzf peppymeter-1920x1280.tar.gz    -C /opt/peppymeter/
 sudo tar xzf peppyspectrum-1920x1280.tar.gz -C /opt/peppyspectrum/
 ```
