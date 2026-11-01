@@ -45,3 +45,33 @@ python3 mkspec-1920x1280.py    # /opt/peppyspectrum/480x320 -> /opt/peppyspectru
 
 The generators scale the pixel keys (`*.x`, `*.y`, bar/topping/reflection sizes,
 etc.) by the same ×4 factor so the skin geometry matches the upscaled images.
+
+## v5 moOde meters (1920×1280)
+
+`peppymeter-v5-1920x1280.tar.gz` holds the 11 meters of moOde's
+[v5-moode-meters](https://github.com/moode-player/plugins/tree/main/peppydisplay/v5-moode-meters)
+plugin (`1280x720-moode` set: black-white, blue, champagne, emerald, gold,
+orange, pure-white, red, rust, tube, white-red), scaled for a 1920×1280 panel.
+
+- Backgrounds/foregrounds: ×4 ESRGAN (**4x-UltraSharp**) then LANCZOS down to
+  **×1.5**; alpha scaled with LANCZOS. Needles/indicators: LANCZOS ×1.5.
+- 16:9 → 3:2: the meter is centred vertically (`meter.y += 100`) and each
+  `*-screen-bgr.png` is extended 100 px top/bottom by repeating its edge rows.
+- `meters.txt`: `distance`, `*.origin.x/y`, `meter.x/y` scaled ×1.5.
+
+Install:
+
+```bash
+sudo tar xzf peppymeter-v5-1920x1280.tar.gz -C /opt/peppymeter/
+```
+
+then `meter.folder = 1920x1280-moode` and `meter = <name>` in
+`/etc/peppymeter/config.txt`, and restart the local display.
+
+Regenerate (needs `torch` (CPU is fine, ~3.5 min/meter), `spandrel`, `pillow`,
+`numpy`, the extracted plugin zip and the `4x-UltraSharp.pth` model):
+
+```bash
+python3 mkskin-v5-1920x1280.py <zip>/update/files/1280x720-moode 1920x1280-moode \
+    --model 4x-UltraSharp.pth
+```
