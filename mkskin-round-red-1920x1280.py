@@ -9,7 +9,7 @@ volume.curve (log1p(k*x)/log1p(k)), angle linear in that level.
 
 usage: mkskin-round-red-1920x1280.py <red-screen-bgr.png> <out-dir> [curve] [0VU dBFS]
 
-<red-screen-bgr.png> = the v5 1920x1280-moode red screen (source of the moOde logo).
+<red-screen-bgr.png> = any v5 red-screen-bgr.png, e.g. 1280x720-moode (source of the moOde logo).
 Defaults (curve 0, 0 VU = -3 dBFS) match volume.curve = 0 in /etc/peppymeter/config.txt.
 """
 import math, sys, os
@@ -171,7 +171,7 @@ def build_fgr():
         ld.ellipse([(cx - RF - 14) * S, (CY - RF - 14) * S, (cx + RF + 14) * S, (CY + RF + 14) * S],
                    outline=(8, 8, 8, 255), width=10 * S)
         # reset button
-        bx, by, br = cx * S, int(CY + 0.66 * R) * S, int(0.085 * R) * S
+        bx, by, br = cx * S, (CY + PIV) * S, int(0.085 * R) * S   # button = needle pivot
         ld.ellipse([bx - br - 6 * S, by - br - 6 * S, bx + br + 6 * S, by + br + 6 * S], fill=(6, 6, 6, 255))
         ld.ellipse([bx - br, by - br, bx + br, by + br], fill=(26, 26, 28, 255))
         ld.ellipse([bx - br * 0.6, by - br * 0.8, bx + br * 0.2, by - br * 0.1], fill=(52, 52, 56, 255))
@@ -202,9 +202,9 @@ def build_needle():
 
 def build_screen():
     scr = Image.new("RGB", (W, H), (0, 0, 0))
-    src = Image.open(SRC_SCREEN).convert("RGB")
-    logo = src.crop((627, 776, 1326, 995))
-    logo = logo.resize((logo.width * 3 // 4, logo.height * 3 // 4), Image.LANCZOS)
+    src = Image.open(SRC_SCREEN).convert("RGB")      # any v5 red-screen-bgr.png: logo on black
+    logo = src.crop(src.convert("L").point(lambda v: 255 if v > 30 else 0).getbbox())
+    logo = logo.resize((524, round(logo.height * 524 / logo.width)), Image.LANCZOS)
     scr.paste(logo, ((W - logo.width) // 2, 970))
     return scr
 

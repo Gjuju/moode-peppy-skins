@@ -109,6 +109,6 @@ in `/opt/peppymeter/1920x1280-moode/meters.txt`. Then `meter = round-red`
 Regenerate (needs `pillow` and the Lato font, `fonts-lato`):
 
 ```bash
-python3 mkskin-round-red-1920x1280.py /opt/peppymeter/1920x1280-moode/red-screen-bgr.png out/1920x1280-moode \
+python3 mkskin-round-red-1920x1280.py /opt/peppymeter/1280x720-moode/red-screen-bgr.png out/1920x1280-moode \
     [curve] [0VU-dBFS]          # defaults: 0, -3
 ```
