@@ -82,3 +82,33 @@ Regenerate (needs `torch` (CPU is fine, ~3.5 min/meter), `spandrel`, `pillow`,
 python3 mkskin-v5-1920x1280.py <zip>/update/files/1280x720-moode 1920x1280-moode \
     --model 4x-UltraSharp.pth
 ```
+
+## round-red (1920×1280)
+
+![round-red](round-red-preview.jpg)
+
+`peppymeter-round-red-1920x1280.tar.gz` adds **round-red** to the
+`1920x1280-moode` set: two round VU meters (black bezel melting into the black
+screen, lower hill hiding the pivot) with the orange-to-yellow face of the v5
+`red` meter. Drawn procedurally (no upscaling).
+
+- Scale: −20…+3 VU over a voltage-linear arc, **0 VU = −3 dBFS** (+3 VU =
+  digital full scale), with the 20…100 % row of a real VU meter.
+- The marks are only true with **`volume.curve = 0`** (PeppyMeter's default)
+  in `/etc/peppymeter/config.txt` (WebUI: Peppy config > meter curve). The curve
+  is global, so it applies to every meter.
+- The foreground holds only fully opaque/transparent pixels over the needle
+  sweep: PeppyMeter re-blits `fgr` over areas whose `bgr` it did not restore,
+  so a translucent foreground (glass, shadow) piles up into needle trails. Glass
+  and inner shadow are baked into `bgr` instead.
+
+Install: `install.sh` extracts it after the v5 set and (re)writes its section
+in `/opt/peppymeter/1920x1280-moode/meters.txt`. Then `meter = round-red`
+(`meter.folder = 1920x1280-moode`) and restart the local display.
+
+Regenerate (needs `pillow` and the Lato font, `fonts-lato`):
+
+```bash
+python3 mkskin-round-red-1920x1280.py /opt/peppymeter/1920x1280-moode/red-screen-bgr.png out/1920x1280-moode \
+    [curve] [0VU-dBFS]          # defaults: 0, -3
+```
