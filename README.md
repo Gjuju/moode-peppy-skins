@@ -14,12 +14,18 @@ every image is resized ×4 and every pixel coordinate in `meters.txt` /
 
 | File | What |
 |---|---|
+| `install.sh` | install everything below into `/opt/peppymeter/` and `/opt/peppyspectrum/` |
 | `peppymeter-1920x1280.tar.gz` | Peppy **Meter** skin — extract into `/opt/peppymeter/` |
 | `peppyspectrum-1920x1280.tar.gz` | Peppy **Spectrum** skin — extract into `/opt/peppyspectrum/` |
 | `mkskin-1920x1280.py` | regenerate the Meter skin from `/opt/peppymeter/480x320` |
 | `mkspec-1920x1280.py` | regenerate the Spectrum skin from `/opt/peppyspectrum/480x320` |
+| `peppymeter-v5-1920x1280.tar.gz` | the 11 v5 moOde meters — see [below](#v5-moode-meters-19201280) |
+| `mkskin-v5-1920x1280.py` | regenerate the v5 meters from the plugin's `1280x720-moode` folder |
+| `peppymeter-round-red-1920x1280.tar.gz` | the **round-red** meter, added to the v5 set — see [below](#round-red-19201280) |
+| `mkskin-round-red-1920x1280.py` | regenerate round-red |
 
-Each tarball contains a top-level `1920x1280/` folder.
+The stock tarballs contain a top-level `1920x1280/` folder, the v5 and
+round-red ones `1920x1280-moode/`.
 
 ## Install
 
