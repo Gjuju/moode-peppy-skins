@@ -23,9 +23,14 @@ every image is resized ×4 and every pixel coordinate in `meters.txt` /
 | `mkskin-v5-1920x1280.py` | regenerate the v5 meters from the plugin's `1280x720-moode` folder |
 | `peppymeter-round-red-1920x1280.tar.gz` | the **round-red** meter, added to the v5 set — see [below](#round-red-19201280) |
 | `mkskin-round-red-1920x1280.py` | regenerate round-red |
+| `peppymeter-adv-silver-1920x1280.tar.gz` | the **adv-silver** meter, added to the v5 set — see [below](#adv-silver-and-adv-black-19201280) |
+| `peppymeter-adv-black-1920x1280.tar.gz` | the **adv-black** meter, added to the v5 set |
+| `mkskin-adv-silver-1920x1280.py`, `mkskin-adv-black-1920x1280.py` | regenerate them |
+| `fonts/` | DSEG7 Classic (SIL OFL 1.1) used by the adv-* volume readout |
+| `tools/` | `preview.py` (needle placement exactly as PeppyMeter draws it), `simpeppy.py` (redraw simulation, shows fgr trails) |
 
-The stock tarballs contain a top-level `1920x1280/` folder, the v5 and
-round-red ones `1920x1280-moode/`.
+The stock tarballs contain a top-level `1920x1280/` folder, the v5,
+round-red and adv-* ones `1920x1280-moode/`.
 
 ## Install
 
@@ -117,4 +122,43 @@ Regenerate (needs `pillow` and the Lato font, `fonts-lato`):
 ```bash
 python3 mkskin-round-red-1920x1280.py /opt/peppymeter/1280x720-moode/red-screen-bgr.png out/1920x1280-moode \
     [curve] [0VU-dBFS]          # defaults: 0, -3
+```
+
+## adv-silver and adv-black (1920×1280)
+
+![adv-silver](adv-silver-preview.jpg)
+
+![adv-black](adv-black-preview.jpg)
+
+Two hi-fi amplifier fronts added to the `1920x1280-moode` set, drawn
+procedurally (no brand, small engraved moOde badge):
+
+- **adv-silver**: brushed silver faceplate, black glass window with two blue
+  backlit 0…100 % scales and red needles, big knob and power button.
+- **adv-black**: deep black faceplate, two meter windows with a flat dual scale
+  (outer 0…100 %, inner dBFS at their true positions), anodised anthracite knob
+  and power button, small display for the volume.
+
+As for round-red, the marks are true with **`volume.curve = 0`**, and the
+foreground has no translucent pixels over the needle sweep.
+
+**Volume readout**: both skins carry `volume.text.*` keys for a volume readout
+drawn in DSEG7 (shipped next to the images). It needs a PeppyMeter patch that
+is not upstream yet
+([project-owner/PeppyMeter#25](https://github.com/project-owner/PeppyMeter/issues/25))
+plus `volume.text.source = <file>` in `/etc/peppymeter/config.txt` and a player
+writing the volume into that file. Stock PeppyMeter ignores these keys: the
+skins work, without the readout.
+
+Install: `install.sh` extracts them after the v5 set and (re)writes their
+sections in `/opt/peppymeter/1920x1280-moode/meters.txt`. Then
+`meter = adv-silver` or `adv-black` (`meter.folder = 1920x1280-moode`) and
+restart the local display.
+
+Regenerate (needs `pillow`, `numpy`, the Lato font `fonts-lato`, and the v5
+plugin's `red-screen-bgr.png` as the moOde logo source):
+
+```bash
+python3 mkskin-adv-silver-1920x1280.py /opt/peppymeter/1280x720-moode/red-screen-bgr.png out/1920x1280-moode fonts/DSEG7Classic-Regular.ttf
+python3 mkskin-adv-black-1920x1280.py  /opt/peppymeter/1280x720-moode/red-screen-bgr.png out/1920x1280-moode fonts/DSEG7Classic-Regular.ttf
 ```
