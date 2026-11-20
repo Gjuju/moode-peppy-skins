@@ -145,9 +145,10 @@ foreground has no translucent pixels over the needle sweep.
 **Volume readout**: both skins carry `volume.text.*` keys for a volume readout
 drawn in DSEG7 (shipped next to the images). It needs a PeppyMeter patch that
 is not upstream yet
-([project-owner/PeppyMeter#25](https://github.com/project-owner/PeppyMeter/issues/25))
+([project-owner/PeppyMeter#26](https://github.com/project-owner/PeppyMeter/pull/26))
 plus `volume.text.source = <file>` in `/etc/peppymeter/config.txt` and a player
-writing the volume into that file. Stock PeppyMeter ignores these keys: the
+writing the volume into that file. Keys: `volume.text.center.x`, `.center.y`,
+`.font.size`, `.color`, `.font`, `.format`, `.format.text`. Stock PeppyMeter ignores these keys: the
 skins work, without the readout.
 
 Install: `install.sh` extracts them after the v5 set and (re)writes their
