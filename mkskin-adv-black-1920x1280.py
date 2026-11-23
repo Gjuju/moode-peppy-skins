@@ -15,29 +15,47 @@ has fully opaque or fully transparent pixels away from the cut edges:
 PeppyMeter re-blits fgr over areas whose bgr it did not restore, so translucent
 fgr pixels pile up. Glows and reflections are baked into bgr.
 
-usage: mkskin-adv-black-1920x1280.py <v5 red-screen-bgr.png (moOde logo source)> <out-dir> [DSEG7 .ttf]
+usage: mkskin-adv-black-1920x1280.py [--text] <v5 red-screen-bgr.png (moOde logo source)> <out-dir> [DSEG7 .ttf]
+
+--text builds 'adv-black-text': no power button and a smaller knob, the volume
+display centred between the knob and the right screen edge and a wide text
+display from the left edge of the left window to the knob, where PeppyMeter
+draws the text readout (text.*, e.g. artist - title) in Lato (SIL OFL 1.1,
+fonts-lato), copied next to the images.
 
 The readout uses DSEG7 Classic (SIL OFL 1.1, fonts-dseg), copied next to the images.
 """
 import math, os, shutil, sys
 import numpy as np
-from PIL import Image, ImageDraw, ImageFilter, ImageFont, ImageChops
+from PIL import Image, ImageDraw, ImageFilter, ImageFont, ImageChops, ImageOps
 
-LOGO_SRC, OUT = sys.argv[1], sys.argv[2]
-DSEG = sys.argv[3] if len(sys.argv) > 3 else "/usr/share/fonts/truetype/dseg/DSEG7Classic-Regular.ttf"
-NAME = "adv-black"
+TEXT = "--text" in sys.argv[1:]
+ARGS = [a for a in sys.argv[1:] if a != "--text"]
+LOGO_SRC, OUT = ARGS[0], ARGS[1]
+DSEG = ARGS[2] if len(ARGS) > 2 else "/usr/share/fonts/truetype/dseg/DSEG7Classic-Regular.ttf"
+TEXT_FONT = "/usr/share/fonts/truetype/lato/Lato-Regular.ttf"
+NAME = "adv-black-text" if TEXT else "adv-black"
 W, H, S = 1920, 1280, 2                         # screen, supersampling
 WINS = ((60, 200, 920, 640), (1000, 200, 1860, 640))
 WIN_R = 6
-CXS, PY = (490, 1430), 775                      # meter centres, pivot y (under the faceplate)
-SPAN = 39                                       # start.angle = +SPAN, stop.angle = -SPAN
-R_OUT, R_MAJ, R_MIN, R_LAB = 510, 425, 456, 540 # outer % row
-R_DB_OUT, R_DB_IN, R_DB_LAB = 367, 251, 394
-ELL = 1.6                                      # scale arcs: ellipse width/height (1 = circles)     # inner dBFS row
-NEEDLE_IN, NEEDLE_OUT, NEEDLE_W = 120, 485, 14
+CXS, PY = (490, 1430), 975                      # meter centres, pivot y (low, under the faceplate: a narrow fan)
+SPAN = 29                                       # start.angle = +SPAN, stop.angle = -SPAN
+STEPS = 3                                       # steps.per.degree: ~4 px needle tip steps
+R_OUT, R_MAJ, R_MIN, R_LAB = 710, 625, 656, 740 # outer % row
+R_DB_OUT, R_DB_IN, R_DB_LAB = 567, 451, 594     # inner dBFS row
+ELL = 1.6                                       # scale arcs: ellipse width/height (1 = circles)
+NEEDLE_IN, NEEDLE_OUT, NEEDLE_W = 320, 685, 14  # needle image from just under the window to the tip
 KNOB = (960, 960, 205)
 POWER = (185, 960, 52)
 DISP = (1405, 901, 1655, 1019)                  # volume display window: 3 digit cells + margin
+TDISP = None
+if TEXT:
+    KNOB = (960, 960, 170)
+    _c = (KNOB[0] + KNOB[2] + 14 + W) // 2                              # between the knob ring and the right screen edge
+    DISP = (_c - 125, 901, _c + 125, 1019)
+    TDISP = (WINS[0][0], 901, KNOB[0] - KNOB[2] - 14 - 30, 1019)        # left window edge to the knob
+DISPS = (DISP, TDISP) if TEXT else (DISP,)
+TEXT_SIZE = 40
 VOL_SIZE = 84
 BADGE = (820, 100, 280)                          # engraved moOde: left x, centre y, width
 
@@ -66,7 +84,8 @@ def logo_mask(width):
     logo = src.crop(src.point(lambda v: 255 if v > 30 else 0).getbbox())
     lo, hi = logo.getextrema()
     logo = logo.point(lambda v: min(255, max(0, (v - lo) * 255 // max(1, hi - lo))))
-    return logo.resize((width, round(logo.height * width / logo.width)), Image.LANCZOS)
+    logo = logo.resize((width, round(logo.height * width / logo.width)), Image.LANCZOS)
+    return ImageOps.expand(logo, border=4 * S)                  # room for the stroke dilation at the crop edges
 
 # ---------------------------------------------------------------- faceplate
 def black_plate():
@@ -120,17 +139,19 @@ def power(img):
 def faceplate():
     img = black_plate()
     d = ImageDraw.Draw(img)
-    for x0, y0, x1, y1 in WINS + (DISP,):           # thin dark recess around each window
+    for x0, y0, x1, y1 in WINS + DISPS:             # thin dark recess around each window
         d.rounded_rectangle(sc(x0 - 4, y0 - 4, x1 + 4, y1 + 4), radius=(WIN_R + 4) * S, fill=(3, 3, 4))
-    knob(img); power(img)
+    knob(img)
+    if not TEXT:
+        power(img)
     badge = logo_mask(BADGE[2] * S).filter(ImageFilter.MaxFilter(5))
-    img.paste((150, 152, 158), (BADGE[0] * S, BADGE[1] * S - badge.height // 2), badge)
+    img.paste((150, 152, 158), ((BADGE[0] - 4) * S, BADGE[1] * S - badge.height // 2), badge)
     return img
 
 def cut_mask():
     m = Image.new("L", (W * S, H * S), 0)
     d = ImageDraw.Draw(m)
-    for box in WINS + (DISP,):
+    for box in WINS + DISPS:
         d.rounded_rectangle(sc(*box), radius=WIN_R * S, fill=255)
     return m
 
@@ -166,13 +187,13 @@ def windows():
     g = ImageChops.add(g, glow.filter(ImageFilter.GaussianBlur(12 * S)))
     g = ImageChops.add(g, glow.filter(ImageFilter.GaussianBlur(3 * S)))
     g = ImageChops.lighter(g, core)
-    # volume display: dark navy with a faint dot matrix
-    x0, y0, x1, y1 = DISP
+    # volume (and text) display: dark navy with a faint dot matrix
     d = ImageDraw.Draw(g)
-    d.rectangle(sc(x0, y0, x1, y1), fill=DISP_BG)
-    for y in range(y0 + 8, y1 - 4, 7):
-        for x in range(x0 + 8, x1 - 4, 7):
-            d.ellipse(sc(x - 1.6, y - 1.6, x + 1.6, y + 1.6), fill=DISP_DOT)
+    for x0, y0, x1, y1 in DISPS:
+        d.rectangle(sc(x0, y0, x1, y1), fill=DISP_BG)
+        for y in range(y0 + 8, y1 - 4, 7):
+            for x in range(x0 + 8, x1 - 4, 7):
+                d.ellipse(sc(x - 1.6, y - 1.6, x + 1.6, y + 1.6), fill=DISP_DOT)
     # soft reflection on the meter windows
     m = Image.new("L", g.size, 0); md = ImageDraw.Draw(m)
     for x0, y0, x1, y1 in WINS:
@@ -192,7 +213,8 @@ def needle():
 
 # ---------------------------------------------------------------- readout placement
 def readout_x():
-    """Centre x of the 3 right-aligned DSEG cells: the display is sized to them."""
+    """Centre x of the 3 right-aligned DSEG cells: the display is sized to them,
+    or they sit at the right end of a wider one."""
     return (DISP[0] + DISP[2]) // 2
 
 # ---------------------------------------------------------------- build
@@ -202,6 +224,8 @@ bgr = plate.copy(); bgr.paste(windows(), (0, 0), cut)
 fgr = plate.convert("RGBA"); fgr.putalpha(ImageChops.invert(cut))
 os.makedirs(OUT, exist_ok=True)
 shutil.copy(DSEG, os.path.join(OUT, os.path.basename(DSEG)))
+if TEXT:
+    shutil.copy(TEXT_FONT, os.path.join(OUT, os.path.basename(TEXT_FONT)))
 bgr.resize((W, H), Image.LANCZOS).save(f"{OUT}/{NAME}-bgr.png")
 fgr.resize((W, H), Image.LANCZOS).save(f"{OUT}/{NAME}-fgr.png")
 needle().save(f"{OUT}/{NAME}-needle.png")
@@ -213,7 +237,7 @@ ui.refresh.period = 0.033
 bgr.filename = {NAME}-bgr.png
 fgr.filename = {NAME}-fgr.png
 indicator.filename = {NAME}-needle.png
-steps.per.degree = 2
+steps.per.degree = {STEPS}
 start.angle = {SPAN}
 stop.angle = {-SPAN}
 distance = {NEEDLE_IN + (NEEDLE_OUT - NEEDLE_IN) // 2}
@@ -231,5 +255,13 @@ volume.text.color = {CORE[0]},{CORE[1]},{CORE[2]}
 volume.text.font = {os.path.basename(DSEG)}
 volume.text.format = {{:!>3.0f}}
 volume.text.format.text = {{:!>3}}
+""")
+    if TEXT:
+        f.write(f"""text.center.x = {(TDISP[0] + TDISP[2]) // 2}
+text.center.y = {(TDISP[1] + TDISP[3]) // 2}
+text.font.size = {TEXT_SIZE}
+text.color = {CORE[0]},{CORE[1]},{CORE[2]}
+text.font = {os.path.basename(TEXT_FONT)}
+text.max.width = {TDISP[2] - TDISP[0] - 30}
 """)
 print("done", OUT)

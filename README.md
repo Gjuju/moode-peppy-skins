@@ -143,9 +143,9 @@ As for round-red, the marks are true with **`volume.curve = 0`**, and the
 foreground has no translucent pixels over the needle sweep.
 
 **Volume readout**: both skins carry `volume.text.*` keys for a volume readout
-drawn in DSEG7 (shipped next to the images). It needs a PeppyMeter patch that
-is not upstream yet
-([project-owner/PeppyMeter#26](https://github.com/project-owner/PeppyMeter/pull/26))
+drawn in DSEG7 (shipped next to the images). It needs a PeppyMeter with
+[project-owner/PeppyMeter#26](https://github.com/project-owner/PeppyMeter/pull/26)
+(merged 2026-11-22)
 plus `volume.text.source = <file>` in `/etc/peppymeter/config.txt` and a player
 writing the volume into that file. Keys: `volume.text.center.x`, `.center.y`,
 `.font.size`, `.color`, `.font`, `.format`, `.format.text`. Stock PeppyMeter ignores these keys: the

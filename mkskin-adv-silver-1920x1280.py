@@ -18,7 +18,7 @@ the images.
 """
 import math, os, shutil, sys
 import numpy as np
-from PIL import Image, ImageDraw, ImageFilter, ImageFont, ImageChops
+from PIL import Image, ImageDraw, ImageFilter, ImageFont, ImageChops, ImageOps
 
 LOGO_SRC, OUT = sys.argv[1], sys.argv[2]
 DSEG = sys.argv[3] if len(sys.argv) > 3 else "/usr/share/fonts/truetype/dseg/DSEG7Classic-Regular.ttf"
@@ -69,7 +69,8 @@ def logo_mask(width):
     logo = src.crop(src.point(lambda v: 255 if v > 30 else 0).getbbox())
     lo, hi = logo.getextrema()
     logo = logo.point(lambda v: min(255, max(0, (v - lo) * 255 // max(1, hi - lo))))
-    return logo.resize((width, round(logo.height * width / logo.width)), Image.LANCZOS)
+    logo = logo.resize((width, round(logo.height * width / logo.width)), Image.LANCZOS)
+    return ImageOps.expand(logo, border=4 * S)                  # room for the stroke dilation at the crop edges
 
 def dome(d, cx, cy, r, light=230, dark=150):
     """Round silver push button: dark gap ring, radial-gradient cap, highlight."""
